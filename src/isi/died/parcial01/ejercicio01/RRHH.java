@@ -16,6 +16,7 @@ public class RRHH {
 		for(Empleado e: empleados){
 			//Pide que se guarde el mes pero me parecio mas completo guardar la fecha 
 			//en la que genero el recibo, es por eso que reescribi el toString() de Recibo
+		
 			recibo.setNumero(i);
 			recibo.setMes(LocalDate.now());
 			recibo.setEmpleado(e);			

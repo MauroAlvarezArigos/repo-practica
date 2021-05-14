@@ -24,7 +24,9 @@ public class Alumno {
 		this();
 		this.nombre = nombre;
 	}
-
+	public List<Examen> getExamenes(){
+		return examenes;
+	}
 
 	public Integer getId() {
 		return id;

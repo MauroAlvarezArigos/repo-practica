@@ -1,10 +1,14 @@
 package isi.died.parcial01.ejercicio02.app;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collector;
 
 import isi.died.parcial01.ejercicio02.db.BaseDeDatos;
+import isi.died.parcial01.ejercicio02.db.BaseDeDatosExcepcion;
 import isi.died.parcial01.ejercicio02.dominio.*;
+import isi.died.parcial01.ejercicio02.dominio.Inscripcion.Estado;
 
 
 public class MySysAcadImpl implements MySysAcad {
@@ -12,6 +16,18 @@ public class MySysAcadImpl implements MySysAcad {
 
 
 	private List<Materia> materia = new ArrayList<Materia>();
+	
+	public void registrarNota(Examen unExamen, Integer unaNota) {
+		unExamen.setNota(unaNota);
+		if(unaNota > 6) {
+			//Incompleto
+			for(Inscripcion i: unExamen.getMateria().getInscripciones()) {	
+				if(i.getInscripto() == unExamen.getAlumno()) {
+					i.setEstado(Estado.PROMOCIONADO);
+				}
+			}
+		}
+	}
 	
 	@Override
 	public void registrarMateria(Materia d) {
@@ -34,13 +50,23 @@ public class MySysAcadImpl implements MySysAcad {
 	
 
 	@Override
-	public void inscribirAlumnoCursada(Docente d, Alumno a, Materia m, Integer cicloLectivo) {
+	public void inscribirAlumnoCursada(Docente d, Alumno a, Materia m, Integer cicloLectivo) throws BaseDeDatosExcepcion, DocenteException{
 		Inscripcion insc = new Inscripcion(cicloLectivo,Inscripcion.Estado.CURSANDO);
-		d.agregarInscripcion(insc);
+		
+		if(m.getDocentes().contains(d))	{
+			d.agregarInscripcion(insc);
+		}
+		else throw new DocenteException();
+		
 		a.addCursada(insc);
 		m.addInscripcion(insc);
 		// DESCOMENTAR Y gestionar excepcion
-		// DB.guardar(insc);
+		try{
+			DB.guardar(insc);
+		}
+		catch (BaseDeDatosExcepcion e) {
+			throw new BaseDeDatosExcepcion();
+		}
 	}
 
 	@Override
@@ -51,6 +77,16 @@ public class MySysAcadImpl implements MySysAcad {
 		m.addExamen(e);
 		// DESCOMENTAR Y gestionar excepcion
 		// DB.guardar(e);
+	}
+
+	@Override
+	public List<Examen> topNExamenes(Materia m, Integer n) {
+		
+		return null;
+	}
+	
+	public Integer cantidadAplazos(Alumno a) {
+		return (int) a.getExamenes().stream().filter(e -> e.getNota()<6).count();
 	}
 	
 
